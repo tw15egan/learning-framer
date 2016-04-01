@@ -22,3 +22,5 @@ $.card1.states.add
 
 $.card1.on Events.Click, ->
 	$.card1.states.switch('two')
+	
+$.card1.states.animationOptions = curve: 'spring(200, 20, 0)'

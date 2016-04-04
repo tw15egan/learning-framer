@@ -16183,7 +16183,6 @@
 	    this._prefer2d = false;
 	    this._alwaysUseImageCache = false;
 	    this._cancelClickEventInDragSession = true;
-	    this._cancelClickEventInDragSessionVelocity = 0.1;
 	    this._createElement();
 	    if (options.hasOwnProperty("frame")) {
 	      options = _.extend(options, options.frame);
@@ -16828,7 +16827,7 @@
 	      return this._getPropertyValue("image");
 	    },
 	    set: function(value) {
-	      var currentValue, defaults, imageUrl, loader, ref;
+	      var currentValue, imageUrl, loader;
 	      if (!(_.isString(value) || value === null)) {
 	        layerValueTypeError("image", value);
 	      }
@@ -16836,10 +16835,7 @@
 	      if (currentValue === value) {
 	        return this.emit("load");
 	      }
-	      defaults = Defaults.getDefaults("Layer", {});
-	      if ((ref = this.backgroundColor) != null ? ref.isEqual(defaults.backgroundColor) : void 0) {
-	        this.backgroundColor = null;
-	      }
+	      this.backgroundColor = null;
 	      this._setPropertyValue("image", value);
 	      if (value === null || value === "") {
 	        this.style["background-image"] = null;
@@ -17334,18 +17330,12 @@
 	  });
 	
 	  Layer.prototype.emit = function() {
-	    var args, eventName, ref, velocity;
+	    var args, eventName, ref;
 	    eventName = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
 	    if (this._cancelClickEventInDragSession) {
 	      if (eventName === Events.Click || eventName === Events.Tap || eventName === Events.TapStart || eventName === Events.TapEnd || eventName === Events.LongPress || eventName === Events.LongPressStart || eventName === Events.LongPressEnd) {
-	        if (this._parentDraggableLayer()) {
-	          velocity = (ref = this._parentDraggableLayer()) != null ? ref.draggable.velocity : void 0;
-	          if (Math.abs(velocity.x) > this._cancelClickEventInDragSessionVelocity) {
-	            return;
-	          }
-	          if (Math.abs(velocity.y) > this._cancelClickEventInDragSessionVelocity) {
-	            return;
-	          }
+	        if ((ref = this._parentDraggableLayer()) != null ? ref.draggable.isMoving : void 0) {
+	          return;
 	        }
 	      }
 	    }
@@ -20723,7 +20713,7 @@
 	
 	  LayerPinchable.prototype._pinch = function(event) {
 	    var pointA, pointB, rotation, scale;
-	    if (event.fingers !== 2) {
+	    if (event.touches.length !== 2) {
 	      return;
 	    }
 	    if (!this.enabled) {
@@ -24848,11 +24838,11 @@
 	
 	DOMEventManager = __webpack_require__(41).DOMEventManager;
 	
-	TouchStart = ["touchstart", "mousedown"];
+	TouchStart = "touchstart";
 	
-	TouchMove = ["touchmove", "mousemove"];
+	TouchMove = "touchmove";
 	
-	TouchEnd = ["touchend", "mouseup"];
+	TouchEnd = "touchend";
 	
 	exports.GestureInputRecognizer = (function() {
 	  function GestureInputRecognizer() {
@@ -24897,11 +24887,7 @@
 	    this.touchmove = bind(this.touchmove, this);
 	    this.touchstart = bind(this.touchstart, this);
 	    this.em = new DOMEventManager();
-	    TouchStart.map((function(_this) {
-	      return function(e) {
-	        return _this.em.wrap(window).addEventListener(e, _this.touchstart);
-	      };
-	    })(this));
+	    this.em.wrap(window).addEventListener(TouchStart, this.touchstart);
 	  }
 	
 	  GestureInputRecognizer.prototype.destroy = function() {
@@ -24917,16 +24903,8 @@
 	    if (this.session) {
 	      return;
 	    }
-	    TouchMove.map((function(_this) {
-	      return function(e) {
-	        return _this.em.wrap(window).addEventListener(e, _this.touchmove);
-	      };
-	    })(this));
-	    TouchEnd.map((function(_this) {
-	      return function(e) {
-	        return _this.em.wrap(window).addEventListener(e, _this.touchend);
-	      };
-	    })(this));
+	    this.em.wrap(window).addEventListener(TouchMove, this.touchmove);
+	    this.em.wrap(window).addEventListener(TouchEnd, this.touchend);
 	    this.em.wrap(window).addEventListener("webkitmouseforcechanged", this._updateMacForce);
 	    this.session = {
 	      startEvent: this._getGestureEvent(event),
@@ -24968,17 +24946,9 @@
 	        }
 	      }
 	    }
-	    TouchMove.map((function(_this) {
-	      return function(e) {
-	        return _this.em.wrap(window).removeEventListener(e, _this.touchmove);
-	      };
-	    })(this));
-	    TouchEnd.map((function(_this) {
-	      return function(e) {
-	        return _this.em.wrap(window).removeEventListener(e, _this.touchend);
-	      };
-	    })(this));
-	    this.em.wrap(window).addEventListener("webkitmouseforcechanged", this._updateMacForce);
+	    this.em.wrap(window).removeEventListener(TouchMove, this.touchmove);
+	    this.em.wrap(window).removeEventListener(TouchEnd, this.touchend);
+	    this.em.wrap(window).removeEventListener("webkitmouseforcechanged", this._updateMacForce);
 	    event = this._getGestureEvent(event);
 	    ref = this.session.started;
 	    for (eventName in ref) {
@@ -25507,13 +25477,13 @@
 /* 53 */
 /***/ function(module, exports) {
 
-	exports.date = 1459780646;
+	exports.date = 1458857331;
 	
 	exports.branch = "master";
 	
-	exports.hash = "6e5fe80";
+	exports.hash = "4e762bf";
 	
-	exports.build = 1622;
+	exports.build = 1614;
 	
 	exports.version = exports.branch + "/" + exports.hash;
 
